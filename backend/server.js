@@ -5,14 +5,20 @@ const axios = require("axios");
 const mysql = require("mysql2/promise");
 const crypto = require("crypto");
 const { GoogleGenAI } = require("@google/genai");
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
 
 dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
-const AUTH_TOKEN_SECRET =
-  process.env.AUTH_TOKEN_SECRET || "courtflow-local-secret-2026";
+const AUTH_TOKEN_SECRET = process.env.AUTH_TOKEN_SECRET;
 const AUTH_TOKEN_EXPIRES_IN_SECONDS = 60 * 60 * 12;
+
+if (!AUTH_TOKEN_SECRET || AUTH_TOKEN_SECRET.length < 32) {
+  console.error("FATAL: AUTH_TOKEN_SECRET is missing or too short (min 32 chars). Set it in .env.");
+  process.exit(1);
+}
 
 const requiredDatabaseEnv = ["DB_HOST", "DB_USER", "DB_NAME"];
 const missingDatabaseEnv = requiredDatabaseEnv.filter(
@@ -37,12 +43,44 @@ const pool = mysql.createPool({
   dateStrings: true,
 });
 
+app.use(helmet({
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: false,
+}));
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map(o => o.trim())
+  : ["http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:3000"];
+
 app.use(
   cors({
-    origin: true,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("CORS not allowed"));
+    },
+    credentials: true,
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: "32kb" }));
+
+const globalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Qua nhieu yeu cau. Vui long thu lai sau." },
+});
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Qua nhieu lan dang nhap that bai. Vui long thu lai sau 15 phut." },
+  skipSuccessfulRequests: true,
+});
+
+app.use(globalLimiter);
 
 function toInteger(value) {
   const parsedValue = Number(value);
@@ -183,16 +221,10 @@ function handleUnexpectedError(res, error, fallbackMessage) {
   console.error(error);
 
   if (error && error.code && error.code.startsWith("ER_")) {
-    return res.status(500).json({
-      message: fallbackMessage,
-      details: formatDatabaseError(error),
-    });
+    return res.status(500).json({ message: fallbackMessage });
   }
 
-  return res.status(500).json({
-    message: fallbackMessage,
-    details: error?.message || "Unexpected server error.",
-  });
+  return res.status(500).json({ message: fallbackMessage });
 }
 
 function createPasswordHash(password, salt) {
@@ -392,7 +424,7 @@ app.get("/api/health", async (_req, res) => {
   }
 });
 
-app.post("/api/auth/login", async (req, res) => {
+app.post("/api/auth/login", loginLimiter, async (req, res) => {
   const { username, password, role } = req.body;
 
   if (!username || !password) {
@@ -401,13 +433,16 @@ app.post("/api/auth/login", async (req, res) => {
     });
   }
 
+  const trimmedUsername = String(username).trim().slice(0, 50);
+  const trimmedPassword = String(password).slice(0, 128);
+
   try {
     const [userRows] = await pool.query(
       `SELECT id, username, full_name, phone, role, password_hash, password_salt
        FROM users
        WHERE username = ?
        LIMIT 1`,
-      [String(username).trim()]
+      [trimmedUsername]
     );
 
     if (userRows.length === 0) {
@@ -417,9 +452,12 @@ app.post("/api/auth/login", async (req, res) => {
     }
 
     const user = userRows[0];
-    const passwordHash = createPasswordHash(String(password), user.password_salt);
+    const passwordHash = createPasswordHash(trimmedPassword, user.password_salt);
 
-    if (passwordHash !== user.password_hash) {
+    if (!crypto.timingSafeEqual(
+      Buffer.from(passwordHash, "hex"),
+      Buffer.from(user.password_hash, "hex")
+    )) {
       return res.status(401).json({
         message: "Ten dang nhap hoac mat khau khong dung.",
       });
@@ -903,19 +941,37 @@ app.post("/api/auth/register", async (req, res) => {
     });
   }
 
+  const trimmedUsername = String(username).trim();
+  const trimmedFullName = String(full_name).trim();
+  const trimmedPhone = String(phone).trim();
+  const trimmedPassword = String(password);
+
+  if (!/^[a-zA-Z0-9_]{3,30}$/.test(trimmedUsername)) {
+    return res.status(400).json({ message: "Username chi duoc chua chu cai, so, dau gach duoi (3-30 ky tu)." });
+  }
+  if (trimmedPassword.length < 8 || trimmedPassword.length > 128) {
+    return res.status(400).json({ message: "Mat khau phai tu 8 den 128 ky tu." });
+  }
+  if (trimmedFullName.length < 2 || trimmedFullName.length > 100) {
+    return res.status(400).json({ message: "Ho ten phai tu 2 den 100 ky tu." });
+  }
+  if (!validatePhone(trimmedPhone)) {
+    return res.status(400).json({ message: "So dien thoai khong hop le (9-15 chu so)." });
+  }
+
   try {
-    const [existing] = await pool.query("SELECT id FROM users WHERE username = ?", [username]);
+    const [existing] = await pool.query("SELECT id FROM users WHERE username = ?", [trimmedUsername]);
     if (existing.length > 0) {
       return res.status(409).json({ message: "Ten dang nhap da ton tai." });
     }
 
     const passwordSalt = crypto.randomBytes(16).toString("hex");
-    const passwordHash = createPasswordHash(String(password), passwordSalt);
+    const passwordHash = createPasswordHash(trimmedPassword, passwordSalt);
 
     const [insertResult] = await pool.query(
       `INSERT INTO users (username, password_hash, password_salt, full_name, phone, role)
        VALUES (?, ?, ?, ?, ?, 'USER')`,
-      [username, passwordHash, passwordSalt, full_name, phone]
+      [trimmedUsername, passwordHash, passwordSalt, trimmedFullName, trimmedPhone]
     );
 
     return res.status(201).json({
