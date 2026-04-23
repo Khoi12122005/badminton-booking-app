@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const axios = require("axios");
 const mysql = require("mysql2/promise");
 const crypto = require("crypto");
+const { GoogleGenAI } = require("@google/genai");
 
 dotenv.config();
 
@@ -892,6 +893,238 @@ app.post("/api/confirm-payment", requireAuth(["ADMIN"]), async (req, res) => {
     }
   }
 });
+
+app.post("/api/auth/register", async (req, res) => {
+  const { username, password, full_name, phone } = req.body;
+
+  if (!username || !password || !full_name || !phone) {
+    return res.status(400).json({
+      message: "Vui long nhap day du thong tin (username, password, full_name, phone).",
+    });
+  }
+
+  try {
+    const [existing] = await pool.query("SELECT id FROM users WHERE username = ?", [username]);
+    if (existing.length > 0) {
+      return res.status(409).json({ message: "Ten dang nhap da ton tai." });
+    }
+
+    const passwordSalt = crypto.randomBytes(16).toString("hex");
+    const passwordHash = createPasswordHash(String(password), passwordSalt);
+
+    const [insertResult] = await pool.query(
+      `INSERT INTO users (username, password_hash, password_salt, full_name, phone, role)
+       VALUES (?, ?, ?, ?, ?, 'USER')`,
+      [username, passwordHash, passwordSalt, full_name, phone]
+    );
+
+    return res.status(201).json({
+      message: "Dang ky thanh cong.",
+      userId: insertResult.insertId
+    });
+  } catch (error) {
+    return handleUnexpectedError(res, error, "Khong the dang ky tai khoan.");
+  }
+});
+
+app.post("/api/courts", requireAuth(["ADMIN"]), async (req, res) => {
+  const { name, price_per_hour } = req.body;
+  if (!name || !Number.isInteger(Number(price_per_hour)) || Number(price_per_hour) <= 0) {
+    return res.status(400).json({ message: "Thong tin san khong hop le." });
+  }
+
+  try {
+    const [result] = await pool.query("INSERT INTO courts (name, price_per_hour) VALUES (?, ?)", [name, Number(price_per_hour)]);
+    return res.status(201).json({ message: "Them san thanh cong.", id: result.insertId });
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: "Ten san da ton tai." });
+    }
+    return handleUnexpectedError(res, error, "Khong the them san.");
+  }
+});
+
+app.put("/api/courts/:id", requireAuth(["ADMIN"]), async (req, res) => {
+  const { name, price_per_hour } = req.body;
+  const courtId = toInteger(req.params.id);
+
+  if (!courtId || !name || !Number.isInteger(Number(price_per_hour)) || Number(price_per_hour) <= 0) {
+    return res.status(400).json({ message: "Thong tin san khong hop le." });
+  }
+
+  try {
+    const [result] = await pool.query("UPDATE courts SET name = ?, price_per_hour = ? WHERE id = ?", [name, Number(price_per_hour), courtId]);
+    if (result.affectedRows === 0) return res.status(404).json({ message: "Khong tim thay san." });
+    return res.json({ message: "Cap nhat san thanh cong." });
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: "Ten san da ton tai." });
+    }
+    return handleUnexpectedError(res, error, "Khong the cap nhat san.");
+  }
+});
+
+app.delete("/api/courts/:id", requireAuth(["ADMIN"]), async (req, res) => {
+  const courtId = toInteger(req.params.id);
+  if (!courtId) return res.status(400).json({ message: "id khong hop le." });
+
+  try {
+    const [result] = await pool.query("DELETE FROM courts WHERE id = ?", [courtId]);
+    if (result.affectedRows === 0) return res.status(404).json({ message: "Khong tim thay san." });
+    return res.json({ message: "Xoa san thanh cong." });
+  } catch (error) {
+    if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+      return res.status(409).json({ message: "San nay da co booking, khong the xoa." });
+    }
+    return handleUnexpectedError(res, error, "Khong the xoa san.");
+  }
+});
+
+app.post("/api/bookings/:id/cancel", requireAuth(["USER", "ADMIN"]), async (req, res) => {
+  const bookingId = toInteger(req.params.id);
+  if (!bookingId) return res.status(400).json({ message: "bookingId khong hop le." });
+
+  try {
+    const [bookings] = await pool.query("SELECT user_id, status FROM bookings WHERE id = ?", [bookingId]);
+    if (bookings.length === 0) return res.status(404).json({ message: "Khong tim thay booking." });
+
+    const booking = bookings[0];
+    if (req.authUser.role !== "ADMIN" && booking.user_id !== req.authUser.id) {
+      return res.status(403).json({ message: "Ban khong co quyen huy booking nay." });
+    }
+
+    if (booking.status !== "PENDING") {
+      return res.status(400).json({ message: "Chi the huy booking dang cho thanh toan." });
+    }
+
+    await pool.query("UPDATE bookings SET status = 'CANCELLED' WHERE id = ?", [bookingId]);
+    return res.json({ message: "Huy booking thanh cong." });
+  } catch (error) {
+    return handleUnexpectedError(res, error, "Khong the huy booking.");
+  }
+});
+
+app.post("/api/chat/send", requireAuth(["USER"]), async (req, res) => {
+  const { content } = req.body;
+  const trimmed = String(content || "").trim();
+  if (!trimmed) return res.status(400).json({ message: "Tin nhắn không được để trống." });
+  if (trimmed.length > 2000) return res.status(400).json({ message: "Tin nhắn quá dài (tối đa 2000 ký tự)." });
+
+  try {
+    const [result] = await pool.query(
+      "INSERT INTO messages (user_id, sender_role, content) VALUES (?, 'USER', ?)",
+      [req.authUser.id, trimmed]
+    );
+    return res.status(201).json({
+      id: result.insertId,
+      sender_role: "USER",
+      content: trimmed,
+      created_at: new Date().toISOString(),
+      is_read: false,
+    });
+  } catch (error) {
+    return handleUnexpectedError(res, error, "Không thể gửi tin nhắn.");
+  }
+});
+
+app.get("/api/chat/messages", requireAuth(["USER"]), async (req, res) => {
+  try {
+    const [messages] = await pool.query(
+      `SELECT id, sender_role, content, is_read, created_at
+       FROM messages
+       WHERE user_id = ?
+       ORDER BY created_at ASC
+       LIMIT 200`,
+      [req.authUser.id]
+    );
+    await pool.query(
+      "UPDATE messages SET is_read = TRUE WHERE user_id = ? AND sender_role = 'ADMIN' AND is_read = FALSE",
+      [req.authUser.id]
+    );
+    return res.json(messages);
+  } catch (error) {
+    return handleUnexpectedError(res, error, "Không thể tải tin nhắn.");
+  }
+});
+app.get("/api/admin/conversations", requireAuth(["ADMIN"]), async (_req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT
+         u.id AS user_id,
+         u.username,
+         u.full_name,
+         u.phone,
+         m_last.content AS last_message,
+         m_last.sender_role AS last_sender,
+         m_last.created_at AS last_at,
+         COUNT(CASE WHEN m.sender_role = 'USER' AND m.is_read = FALSE THEN 1 END) AS unread_count
+       FROM users u
+       INNER JOIN messages m ON m.user_id = u.id
+       INNER JOIN (
+         SELECT user_id, content, sender_role, created_at
+         FROM messages m2
+         WHERE m2.id = (SELECT MAX(id) FROM messages WHERE user_id = m2.user_id)
+       ) m_last ON m_last.user_id = u.id
+       WHERE u.role = 'USER'
+       GROUP BY u.id, u.username, u.full_name, u.phone, m_last.content, m_last.sender_role, m_last.created_at
+       ORDER BY m_last.created_at DESC`
+    );
+    return res.json(rows);
+  } catch (error) {
+    return handleUnexpectedError(res, error, "Không thể tải danh sách hội thoại.");
+  }
+});
+app.get("/api/admin/messages/:userId", requireAuth(["ADMIN"]), async (req, res) => {
+  const userId = toInteger(req.params.userId);
+  if (!userId) return res.status(400).json({ message: "userId không hợp lệ." });
+
+  try {
+    const [messages] = await pool.query(
+      `SELECT id, sender_role, content, is_read, created_at
+       FROM messages
+       WHERE user_id = ?
+       ORDER BY created_at ASC
+       LIMIT 300`,
+      [userId]
+    );
+    await pool.query(
+      "UPDATE messages SET is_read = TRUE WHERE user_id = ? AND sender_role = 'USER' AND is_read = FALSE",
+      [userId]
+    );
+    return res.json(messages);
+  } catch (error) {
+    return handleUnexpectedError(res, error, "Không thể tải tin nhắn.");
+  }
+});
+app.post("/api/admin/messages/:userId", requireAuth(["ADMIN"]), async (req, res) => {
+  const userId = toInteger(req.params.userId);
+  if (!userId) return res.status(400).json({ message: "userId không hợp lệ." });
+
+  const { content } = req.body;
+  const trimmed = String(content || "").trim();
+  if (!trimmed) return res.status(400).json({ message: "Tin nhắn không được để trống." });
+  if (trimmed.length > 2000) return res.status(400).json({ message: "Tin nhắn quá dài." });
+
+  try {
+    const [userRows] = await pool.query("SELECT id FROM users WHERE id = ? AND role = 'USER' LIMIT 1", [userId]);
+    if (userRows.length === 0) return res.status(404).json({ message: "Không tìm thấy người dùng." });
+
+    const [result] = await pool.query(
+      "INSERT INTO messages (user_id, sender_role, content) VALUES (?, 'ADMIN', ?)",
+      [userId, trimmed]
+    );
+    return res.status(201).json({
+      id: result.insertId,
+      sender_role: "ADMIN",
+      content: trimmed,
+      created_at: new Date().toISOString(),
+      is_read: false,
+    });
+  } catch (error) {
+    return handleUnexpectedError(res, error, "Không thể gửi tin nhắn.");
+  }
+});
+
 
 app.use((req, res) => {
   res.status(404).json({

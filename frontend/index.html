@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đặt sân cầu lông + VietQR</title>
+    <title>Sân Cầu Lông Thiên Minh – Đặt sân online</title>
+    <meta name="description" content="Đặt sân cầu lông Thiên Minh trực tuyến. Sân chuẩn thi đấu, mở cửa 5:00–23:00. Thanh toán QR nhanh chóng." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -21,79 +22,111 @@
       <header class="hero hero-home">
         <nav class="topbar">
           <a class="brand brand-link" href="#booking-section">
-            <span class="brand-mark">CF</span>
+            <span class="brand-mark">TM</span>
             <span class="brand-copy">
-              <strong>CourtFlow</strong>
-              <small>Booking + VietQR</small>
+              <strong>Thiên Minh</strong>
+              <small>Sân cầu lông chuyên nghiệp</small>
             </span>
           </a>
 
           <div class="topbar-links">
             <a href="#booking-section">Đặt sân</a>
-            <a href="#admin-section">Dashboard</a>
-            <a href="./admin.html">Admin riêng</a>
+            <a href="#my-bookings-section">Lịch sử của tôi</a>
+            <a href="#" id="logout-btn">Đăng xuất</a>
           </div>
         </nav>
 
         <div class="hero-grid hero-grid-home">
           <div class="hero-copy">
-            <span class="eyebrow-pill">Badminton Booking SaaS</span>
-            <p class="eyebrow">Thanh toán QR ngân hàng thật</p>
-            <h1>Đặt sân trong vài phút, tạo QR thanh toán như một sản phẩm thật.</h1>
+            <span class="eyebrow-pill">🏸 Mở cửa 05:00 – 23:00 mỗi ngày</span>
+            <h1>Sân Cầu Lông<br/><span class="hero-name-accent">Thiên Minh</span></h1>
             <p class="hero-text">
-              Một giao diện local nhưng mang cảm giác production: booking theo
-              khung giờ, tính tiền tự động, sinh VietQR real-time và quản lý
-              trạng thái thanh toán trên cùng một trải nghiệm mượt mà.
+              Hệ thống sân cầu lông chuẩn thi đấu, thông thoáng và đầy đủ tiện nghi.
+              Đặt sân trực tuyến, thanh toán QR tức thì — nhanh chóng và tiện lợi.
             </p>
 
             <div class="hero-actions">
-              <a class="primary-btn" href="#booking-section">Bắt đầu đặt sân</a>
-              <a class="ghost-btn" href="./admin.html">Mở admin dashboard</a>
+              <a class="primary-btn" href="#booking-section">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Đặt sân ngay
+              </a>
+              <a class="ghost-btn" href="#my-bookings-section">Xem lịch đặt của tôi</a>
             </div>
 
             <div class="hero-badges">
-              <span>Node.js + Express</span>
-              <span>MySQL local</span>
-              <span>VietQR API thật</span>
+              <span>🏆 Sân chuẩn thi đấu</span>
+              <span>💡 Đèn chiếu sáng cao cấp</span>
+              <span>🅿️ Bãi đỗ xe miễn phí</span>
+              <span>📱 Thanh toán QR</span>
             </div>
           </div>
 
           <div class="hero-stack">
-            <section class="hero-card hero-card-glow">
-              <div class="hero-card-head">
-                <div>
-                  <p class="section-label">Realtime flow</p>
-                  <h2>Booking, payment, confirm</h2>
+            <!-- Court showcase cards -->
+            <section class="hero-card hero-card-glow court-showcase-card">
+              <div class="court-showcase-header">
+                <div class="court-icon-wrap">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 </div>
-                <span class="status-badge pending">Live preview</span>
+                <div>
+                  <p class="section-label">Hệ thống sân</p>
+                  <h2>4 Sân hiện đại</h2>
+                </div>
+                <span class="status-badge paid">Đang mở</span>
               </div>
 
-              <div class="hero-metrics">
-                <article class="metric-card">
-                  <span class="metric-label">Court booking</span>
-                  <strong>2 bước</strong>
-                  <small>Chọn sân, nhập giờ, hệ thống tự tính giá</small>
-                </article>
-                <article class="metric-card">
-                  <span class="metric-label">QR payment</span>
-                  <strong>qrDataURL</strong>
-                  <small>Lấy trực tiếp từ VietQR, không dùng mock image</small>
-                </article>
-                <article class="metric-card">
-                  <span class="metric-label">Admin action</span>
-                  <strong>PENDING → PAID</strong>
-                  <small>Xác nhận thanh toán thủ công rõ ràng</small>
-                </article>
+              <div class="court-showcase-grid">
+                <div class="showcase-court-item">
+                  <div class="showcase-court-icon">🏅</div>
+                  <div>
+                    <strong>Sân Trung Tâm</strong>
+                    <span>120.000đ / giờ</span>
+                  </div>
+                </div>
+                <div class="showcase-court-item">
+                  <div class="showcase-court-icon">⭐</div>
+                  <div>
+                    <strong>Sân VIP</strong>
+                    <span>150.000đ / giờ</span>
+                  </div>
+                </div>
+                <div class="showcase-court-item">
+                  <div class="showcase-court-icon">🎯</div>
+                  <div>
+                    <strong>Sân Tiêu Chuẩn</strong>
+                    <span>100.000đ / giờ</span>
+                  </div>
+                </div>
+                <div class="showcase-court-item">
+                  <div class="showcase-court-icon">💪</div>
+                  <div>
+                    <strong>Sân Tập Luyện</strong>
+                    <span>90.000đ / giờ</span>
+                  </div>
+                </div>
               </div>
             </section>
 
-            <section class="hero-card hero-card-compact">
-              <p class="section-label">Tại sao giao diện này khác</p>
-              <ul class="feature-list">
-                <li>Sticky glass navbar và khoảng trắng kiểu SaaS</li>
-                <li>Form, cards và table được nâng cấp để đưa vào portfolio</li>
-                <li>Landing page + dashboard hybrid nhưng vẫn giữ nguyên logic cũ</li>
-              </ul>
+            <section class="hero-card amenities-card">
+              <p class="section-label">Tiện ích & dịch vụ</p>
+              <div class="amenities-grid">
+                <div class="amenity-item">
+                  <span class="amenity-icon">🚿</span>
+                  <span>Phòng thay đồ</span>
+                </div>
+                <div class="amenity-item">
+                  <span class="amenity-icon">☕</span>
+                  <span>Khu vực nghỉ ngơi</span>
+                </div>
+                <div class="amenity-item">
+                  <span class="amenity-icon">🛒</span>
+                  <span>Cửa hàng phụ kiện</span>
+                </div>
+                <div class="amenity-item">
+                  <span class="amenity-icon">📶</span>
+                  <span>WiFi miễn phí</span>
+                </div>
+              </div>
             </section>
           </div>
         </div>
@@ -104,21 +137,21 @@
           <span class="info-kicker">01</span>
           <div>
             <strong>Chọn sân phù hợp</strong>
-            <p>Hiển thị giá theo giờ rõ ràng và dễ so sánh.</p>
+            <p>4 loại sân với giá khác nhau, phù hợp mọi nhu cầu từ tập luyện đến thi đấu.</p>
           </div>
         </article>
         <article class="info-pill">
           <span class="info-kicker">02</span>
           <div>
-            <strong>Tạo booking chính xác</strong>
-            <p>Không trùng giờ, không sai định dạng, không sai tổng tiền.</p>
+            <strong>Đặt sân online</strong>
+            <p>Điền thông tin, chọn khung giờ, hệ thống kiểm tra trùng lịch tự động.</p>
           </div>
         </article>
         <article class="info-pill">
           <span class="info-kicker">03</span>
           <div>
             <strong>Thanh toán bằng QR</strong>
-            <p>Nhận đúng số tiền và nội dung chuyển khoản theo booking.</p>
+            <p>Quét mã QR ngân hàng, chuyển khoản đúng số tiền, xác nhận tức thì.</p>
           </div>
         </article>
       </section>
@@ -258,21 +291,14 @@
         </section>
       </main>
 
-      <section id="admin-section" class="panel admin-panel">
+      <section id="my-bookings-section" class="panel admin-panel">
         <div class="section-heading">
           <div>
-            <p class="section-label">Dashboard</p>
-            <h2>Booking dashboard</h2>
+            <p class="section-label">Lịch sử</p>
+            <h2>Lịch sử đặt sân của tôi</h2>
             <p class="section-copy">
-              Theo dõi tất cả booking, kiểm tra trạng thái hiện tại và xác nhận
-              thanh toán từ giao diện quản trị.
+              Theo dõi tất cả các sân bạn đã đặt, kiểm tra trạng thái thanh toán và hủy nếu cần.
             </p>
-          </div>
-          <div class="section-actions">
-            <a class="ghost-btn" href="./admin.html">Mở admin riêng</a>
-            <button id="refresh-bookings-btn" class="ghost-btn" type="button">
-              Tải lại booking
-            </button>
           </div>
         </div>
 
@@ -282,7 +308,6 @@
               <tr>
                 <th>ID</th>
                 <th>Sân</th>
-                <th>Khách hàng</th>
                 <th>Ngày</th>
                 <th>Khung giờ</th>
                 <th>Tổng tiền</th>
@@ -290,14 +315,46 @@
                 <th>Hành động</th>
               </tr>
             </thead>
-            <tbody id="bookings-table-body">
+            <tbody id="my-bookings-table-body">
               <tr>
-                <td colspan="8" class="table-empty">Đang tải dữ liệu booking...</td>
+                <td colspan="7" class="table-empty">Đang tải dữ liệu...</td>
               </tr>
             </tbody>
           </table>
         </div>
       </section>
+    </div>
+
+    <!-- Chat Widget: User ↔ Admin -->
+    <button class="chat-widget-btn" id="chat-widget-btn" title="Chat với hỗ trợ">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <span class="chat-unread-badge hidden" id="chat-unread-badge">0</span>
+    </button>
+
+    <div class="chat-window" id="chat-window">
+      <div class="chat-header">
+        <div class="chat-header-info">
+          <div class="chat-header-avatar">TM</div>
+          <div>
+            <h3>Hỗ trợ Thiên Minh</h3>
+            <span class="chat-header-status">
+              <span class="live-dot"></span> Quản trị viên
+            </span>
+          </div>
+        </div>
+        <button class="chat-close-btn" id="chat-close-btn" title="Đóng">&times;</button>
+      </div>
+      <div class="chat-body" id="chat-body">
+        <div class="chat-loading" id="chat-loading">Đang tải...</div>
+      </div>
+      <form class="chat-input-area" id="chat-input-form">
+        <input type="text" id="chat-input-message" placeholder="Nhập tin nhắn..." autocomplete="off" maxlength="2000" />
+        <button type="submit" id="chat-send-btn" title="Gửi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
+      </form>
     </div>
 
     <script src="./app.js"></script>

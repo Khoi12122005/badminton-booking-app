@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký - CourtFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="page-shell auth-wrapper">
+      <main class="auth-card">
+        <div class="brand-mark">CF</div>
+        <h1>Tạo tài khoản</h1>
+        <p>Điền thông tin để tham gia đặt sân cầu lông</p>
+
+        <div id="global-message" class="message hidden" role="alert"></div>
+
+        <form id="register-form" class="auth-form">
+          <label class="field">
+            <span>Tên đăng nhập</span>
+            <input id="reg-username" name="username" type="text" placeholder="Nhập tên đăng nhập (viết liền không dấu)" required />
+          </label>
+
+          <label class="field">
+            <span>Họ và tên</span>
+            <input id="reg-fullname" name="full_name" type="text" placeholder="Nguyễn Văn A" required />
+          </label>
+
+          <label class="field">
+            <span>Số điện thoại</span>
+            <input id="reg-phone" name="phone" type="tel" placeholder="0901234567" required />
+          </label>
+
+          <label class="field">
+            <span>Mật khẩu</span>
+            <input id="reg-password" name="password" type="password" placeholder="Tạo mật khẩu an toàn" required />
+          </label>
+
+          <button id="register-btn" class="primary-btn primary-btn-wide" type="submit">
+            Đăng ký
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          Đã có tài khoản? <a href="./login.html">Đăng nhập</a>
+        </div>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
