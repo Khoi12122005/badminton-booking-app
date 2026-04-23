@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đặt sân cầu lông + VietQR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="page-shell">
+      <header class="hero hero-home">
+        <nav class="topbar">
+          <a class="brand brand-link" href="#booking-section">
+            <span class="brand-mark">CF</span>
+            <span class="brand-copy">
+              <strong>CourtFlow</strong>
+              <small>Booking + VietQR</small>
+            </span>
+          </a>
+
+          <div class="topbar-links">
+            <a href="#booking-section">Đặt sân</a>
+            <a href="#admin-section">Dashboard</a>
+            <a href="./admin.html">Admin riêng</a>
+          </div>
+        </nav>
+
+        <div class="hero-grid hero-grid-home">
+          <div class="hero-copy">
+            <span class="eyebrow-pill">Badminton Booking SaaS</span>
+            <p class="eyebrow">Thanh toán QR ngân hàng thật</p>
+            <h1>Đặt sân trong vài phút, tạo QR thanh toán như một sản phẩm thật.</h1>
+            <p class="hero-text">
+              Một giao diện local nhưng mang cảm giác production: booking theo
+              khung giờ, tính tiền tự động, sinh VietQR real-time và quản lý
+              trạng thái thanh toán trên cùng một trải nghiệm mượt mà.
+            </p>
+
+            <div class="hero-actions">
+              <a class="primary-btn" href="#booking-section">Bắt đầu đặt sân</a>
+              <a class="ghost-btn" href="./admin.html">Mở admin dashboard</a>
+            </div>
+
+            <div class="hero-badges">
+              <span>Node.js + Express</span>
+              <span>MySQL local</span>
+              <span>VietQR API thật</span>
+            </div>
+          </div>
+
+          <div class="hero-stack">
+            <section class="hero-card hero-card-glow">
+              <div class="hero-card-head">
+                <div>
+                  <p class="section-label">Realtime flow</p>
+                  <h2>Booking, payment, confirm</h2>
+                </div>
+                <span class="status-badge pending">Live preview</span>
+              </div>
+
+              <div class="hero-metrics">
+                <article class="metric-card">
+                  <span class="metric-label">Court booking</span>
+                  <strong>2 bước</strong>
+                  <small>Chọn sân, nhập giờ, hệ thống tự tính giá</small>
+                </article>
+                <article class="metric-card">
+                  <span class="metric-label">QR payment</span>
+                  <strong>qrDataURL</strong>
+                  <small>Lấy trực tiếp từ VietQR, không dùng mock image</small>
+                </article>
+                <article class="metric-card">
+                  <span class="metric-label">Admin action</span>
+                  <strong>PENDING → PAID</strong>
+                  <small>Xác nhận thanh toán thủ công rõ ràng</small>
+                </article>
+              </div>
+            </section>
+
+            <section class="hero-card hero-card-compact">
+              <p class="section-label">Tại sao giao diện này khác</p>
+              <ul class="feature-list">
+                <li>Sticky glass navbar và khoảng trắng kiểu SaaS</li>
+                <li>Form, cards và table được nâng cấp để đưa vào portfolio</li>
+                <li>Landing page + dashboard hybrid nhưng vẫn giữ nguyên logic cũ</li>
+              </ul>
+            </section>
+          </div>
+        </div>
+      </header>
+
+      <section class="info-strip">
+        <article class="info-pill">
+          <span class="info-kicker">01</span>
+          <div>
+            <strong>Chọn sân phù hợp</strong>
+            <p>Hiển thị giá theo giờ rõ ràng và dễ so sánh.</p>
+          </div>
+        </article>
+        <article class="info-pill">
+          <span class="info-kicker">02</span>
+          <div>
+            <strong>Tạo booking chính xác</strong>
+            <p>Không trùng giờ, không sai định dạng, không sai tổng tiền.</p>
+          </div>
+        </article>
+        <article class="info-pill">
+          <span class="info-kicker">03</span>
+          <div>
+            <strong>Thanh toán bằng QR</strong>
+            <p>Nhận đúng số tiền và nội dung chuyển khoản theo booking.</p>
+          </div>
+        </article>
+      </section>
+
+      <main class="main-grid">
+        <section id="booking-section" class="panel panel-elevated">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Bước 1</p>
+              <h2>Danh sách sân & form đặt sân</h2>
+              <p class="section-copy">
+                Chọn sân mong muốn, nhập thông tin khách và xác định khung giờ
+                để hệ thống tạo booking chính xác.
+              </p>
+            </div>
+            <button id="reload-courts-btn" class="ghost-btn" type="button">
+              Tải lại sân
+            </button>
+          </div>
+
+          <div id="global-message" class="message hidden" role="alert"></div>
+
+          <div id="courts-grid" class="courts-grid"></div>
+
+          <form id="booking-form" class="booking-form">
+            <div class="form-grid">
+              <label class="field">
+                <span>Họ và tên</span>
+                <input
+                  id="customer-name"
+                  name="customer_name"
+                  type="text"
+                  placeholder="Nguyễn Văn A"
+                  required
+                />
+              </label>
+
+              <label class="field">
+                <span>Số điện thoại</span>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  inputmode="numeric"
+                  placeholder="0901234567"
+                  required
+                />
+              </label>
+
+              <label class="field">
+                <span>Ngày đặt sân</span>
+                <input id="booking-date" name="booking_date" type="date" required />
+              </label>
+
+              <label class="field">
+                <span>Giờ bắt đầu</span>
+                <select id="start-time" name="start_time" required></select>
+              </label>
+
+              <label class="field">
+                <span>Giờ kết thúc</span>
+                <select id="end-time" name="end_time" required></select>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button id="submit-booking-btn" class="primary-btn" type="submit">
+                Đặt sân ngay
+              </button>
+              <p class="helper-text">
+                Hệ thống hiện nhận khung giờ tròn theo từng tiếng để tính tiền
+                rõ ràng và tránh sai lệch.
+              </p>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel panel-side">
+          <div class="section-heading section-heading-tight">
+            <div>
+              <p class="section-label">Bước 2</p>
+              <h2>Thông tin booking & thanh toán</h2>
+              <p class="section-copy">
+                Sau khi tạo booking, người dùng có thể sinh mã QR ngân hàng ngay
+                để chuyển khoản.
+              </p>
+            </div>
+          </div>
+
+          <div id="booking-result" class="summary-card empty-state">
+            <h3>Chưa có booking mới</h3>
+            <p>Hoàn tất form bên trái để xem tổng tiền và tạo VietQR thanh toán.</p>
+          </div>
+
+          <div id="payment-card" class="payment-card hidden">
+            <div class="payment-header">
+              <div>
+                <p class="section-label">Bước 3</p>
+                <h3>Thanh toán bằng QR ngân hàng</h3>
+                <p class="section-copy">
+                  Tạo mã QR đúng số tiền, đúng nội dung chuyển khoản và đúng
+                  booking đang thao tác.
+                </p>
+              </div>
+              <span id="payment-status-badge" class="status-badge pending">
+                Đang chờ thanh toán
+              </span>
+            </div>
+
+            <button id="create-qr-btn" class="primary-btn primary-btn-wide" type="button">
+              Thanh toán QR
+            </button>
+
+            <div id="qr-result" class="qr-result hidden">
+              <div class="qr-wrapper">
+                <div class="qr-frame">
+                  <img id="qr-image" alt="QR thanh toán VietQR" />
+                </div>
+              </div>
+              <div class="qr-meta">
+                <div class="meta-row">
+                  <span>Số tiền</span>
+                  <strong id="qr-amount">0 đ</strong>
+                </div>
+                <div class="meta-row">
+                  <span>Nội dung chuyển khoản</span>
+                  <strong id="qr-add-info">Thanh toan san #0</strong>
+                </div>
+                <div class="meta-note">
+                  Sau khi khách chuyển khoản, admin bấm
+                  <strong>Xác nhận đã thanh toán</strong> ở dashboard để đổi
+                  trạng thái sang <strong>PAID</strong>.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <section id="admin-section" class="panel admin-panel">
+        <div class="section-heading">
+          <div>
+            <p class="section-label">Dashboard</p>
+            <h2>Booking dashboard</h2>
+            <p class="section-copy">
+              Theo dõi tất cả booking, kiểm tra trạng thái hiện tại và xác nhận
+              thanh toán từ giao diện quản trị.
+            </p>
+          </div>
+          <div class="section-actions">
+            <a class="ghost-btn" href="./admin.html">Mở admin riêng</a>
+            <button id="refresh-bookings-btn" class="ghost-btn" type="button">
+              Tải lại booking
+            </button>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Sân</th>
+                <th>Khách hàng</th>
+                <th>Ngày</th>
+                <th>Khung giờ</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="bookings-table-body">
+              <tr>
+                <td colspan="8" class="table-empty">Đang tải dữ liệu booking...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

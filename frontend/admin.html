@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Booking - CourtFlow VietQR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-three"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="page-shell">
+      <header class="hero hero-admin">
+        <nav class="topbar">
+          <a class="brand brand-link" href="./index.html">
+            <span class="brand-mark">CF</span>
+            <span class="brand-copy">
+              <strong>CourtFlow Admin</strong>
+              <small>Operations dashboard</small>
+            </span>
+          </a>
+
+          <div class="topbar-links">
+            <a href="./index.html">Trang đặt sân</a>
+            <a href="#admin-section">Dashboard</a>
+          </div>
+        </nav>
+
+        <div class="hero-grid hero-grid-admin">
+          <div class="hero-copy">
+            <span class="eyebrow-pill">Admin workspace</span>
+            <p class="eyebrow">Quản lý booking theo thời gian thực</p>
+            <h1>Một dashboard rõ ràng để vận hành booking và xác nhận thanh toán.</h1>
+            <p class="hero-text">
+              Thiết kế tập trung vào khả năng đọc nhanh, thao tác nhanh và trạng
+              thái rõ ràng. Phù hợp cho lễ tân, chủ sân hoặc dùng như một demo
+              portfolio có cảm giác SaaS thật.
+            </p>
+
+            <div class="hero-actions">
+              <a class="primary-btn" href="#admin-section">Xem booking</a>
+              <a class="ghost-btn" href="./index.html">Về trang người dùng</a>
+            </div>
+          </div>
+
+          <div class="hero-stack">
+            <section class="hero-card hero-card-glow">
+              <div class="hero-card-head">
+                <div>
+                  <p class="section-label">Operations summary</p>
+                  <h2>Admin quick guide</h2>
+                </div>
+                <span class="status-badge paid">Control panel</span>
+              </div>
+
+              <div class="hero-metrics">
+                <article class="metric-card">
+                  <span class="metric-label">Theo dõi</span>
+                  <strong>Booking list</strong>
+                  <small>Hiển thị đầy đủ khách, sân, giờ và số tiền</small>
+                </article>
+                <article class="metric-card">
+                  <span class="metric-label">Đối soát</span>
+                  <strong>PENDING / PAID</strong>
+                  <small>Nhìn trạng thái ngay trên từng dòng dữ liệu</small>
+                </article>
+                <article class="metric-card">
+                  <span class="metric-label">Hành động</span>
+                  <strong>1 click confirm</strong>
+                  <small>Xác nhận nhanh khi khách đã chuyển khoản</small>
+                </article>
+              </div>
+            </section>
+          </div>
+        </div>
+      </header>
+
+      <section id="admin-section" class="panel admin-panel">
+        <div class="section-heading">
+          <div>
+            <p class="section-label">Admin</p>
+            <h2>Danh sách booking</h2>
+            <p class="section-copy">
+              Dùng bảng này để rà soát booking mới, kiểm tra trạng thái và
+              chuyển booking sang PAID khi cần.
+            </p>
+          </div>
+          <button id="refresh-bookings-btn" class="ghost-btn" type="button">
+            Tải lại booking
+          </button>
+        </div>
+
+        <div id="global-message" class="message hidden" role="alert"></div>
+
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Sân</th>
+                <th>Khách hàng</th>
+                <th>Ngày</th>
+                <th>Khung giờ</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="bookings-table-body">
+              <tr>
+                <td colspan="8" class="table-empty">Đang tải dữ liệu booking...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
